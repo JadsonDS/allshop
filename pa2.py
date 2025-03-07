@@ -212,7 +212,7 @@ if __name__ == '__main__':
     # ==================================================
     # Import dataset
     # ==================================================
-    df = pd.read_csv('order_items_cleaned.csv')
+    df = pd.read_csv('datasets/order_items_cleaned.csv')
 
     # ==================================================
     # Barra Lateral
