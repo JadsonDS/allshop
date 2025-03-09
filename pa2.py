@@ -39,7 +39,7 @@ def filtra_df(df):    # Side Bar
 
     estado_selecionado=st.sidebar.multiselect('Selecione o Estado',
                                                 options=lista_estados,
-                                                default=lista_estados)
+                                                default=[lista_estados[0]])
 
     customers_df=df[df['customer_state'].isin(estado_selecionado)] 
     sellers_df=df[df['seller_state'].isin(estado_selecionado)] 
