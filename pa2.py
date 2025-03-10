@@ -40,29 +40,33 @@ def filtra_df(df):    # Side Bar
     estado_selecionado=st.sidebar.multiselect('Selecione o Estado',
                                                 options=lista_estados,
                                                 default=[lista_estados[0]])
-
-    customers_df=df[df['customer_state'].isin(estado_selecionado)] 
-    sellers_df=df[df['seller_state'].isin(estado_selecionado)] 
+   
+    # **Filtro por Data**
+    df["order_purchase_timestamp"]=pd.to_datetime(df["order_purchase_timestamp"])
     
-    # Filtro por Data
-    min_date = pd.to_datetime('2017-01-01')  # Data mínima no dataset
-    max_date = pd.to_datetime('2018-12-31')  # Data máxima no dataset
-    date_range = st.sidebar.date_input("📅 Período de Pedido", [min_date, max_date])
-
-    # Filtro por Status do Pedido
+    min_date = df["order_purchase_timestamp"].min()
+    max_date = df["order_purchase_timestamp"].max()
+    date_range = st.sidebar.date_input("📅 Período de Pedido", [min_date, max_date], min_value=min_date, max_value=max_date)
+    
+    dff = df[(df["order_purchase_timestamp"] >=  pd.to_datetime(date_range[0])) & (df["order_purchase_timestamp"] <=  pd.to_datetime (date_range[1]))]
+ 
+    customers_df=dff[dff['customer_state'].isin(estado_selecionado)]
+    sellers_df=dff[dff['seller_state'].isin(estado_selecionado)]    
+             
+    # **Filtro por Status**
     status_list = ['delivered', 'shipped', 'canceled', 'processing', 'invoiced']
     selected_status = st.sidebar.multiselect("📦 Status do Pedido", status_list, default=['delivered'])
 
-    # Filtro por Região
+    # **Filtro por Região (agora permitindo mais de uma)**
     regions = ['Norte', 'Nordeste', 'Centro-Oeste', 'Sudeste', 'Sul']
-    selected_region = st.sidebar.selectbox("🌍 Selecione a Região", regions)
+    selected_region = st.sidebar.multiselect("🌍 Selecione a Região", regions, default=regions)
 
-    # Filtro por Faixa de Preço
+    # **Filtro por Faixa de Preço**
     price_range = st.sidebar.slider("💰 Faixa de Preço (R$)", 0, 5000, (50, 1000))
 
-    # Filtro por Número de Itens
+    # **Filtro por Número de Itens**
     items_range = st.sidebar.slider("📊 Número de Itens por Pedido", 1, 10, (1, 5))
-           
+    
     return customers_df, sellers_df
 
 def big_numbers(c_df, s_df):
@@ -147,7 +151,7 @@ def visoes_gerais(c_df, s_df):
     ax4.set_ylabel('Ticket Médio (R$)')
     ax4.set_xticklabels(ax4.get_xticklabels(), rotation=45)
     col4.pyplot(fig4)
-
+    
     return None
 
 def visoes_temporais(c_df, s_df):
@@ -213,7 +217,7 @@ if __name__ == '__main__':
     # Import dataset
     # ==================================================
     df = pd.read_csv('dataset/order_items_cleaned.csv')
-    
+
     # ==================================================
     # Barra Lateral
     # ==================================================
@@ -265,14 +269,16 @@ if __name__ == '__main__':
     """,
     unsafe_allow_html=True)     
  
-with tab2: 
-    # Big Number
-    big_numbers(customers_df, sellers_df)
-    
-with tab3:
-    # Visão Geral Gráficas
-    visoes_gerais(customers_df, sellers_df)
+    with tab2: 
+        # Big Number
+        big_numbers(customers_df, sellers_df)
 
-with tab4:
-    # Visões Temporais (mês) para o Estado Selecionado
-    visoes_temporais(customers_df, sellers_df)
+    with tab3:
+        # Visão Geral Gráficas
+        visoes_gerais(customers_df, sellers_df)
+
+    with tab4:
+        # Visões Temporais (mês) para o Estado Selecionado
+        visoes_temporais(customers_df, sellers_df) 
+
+
